@@ -32,7 +32,8 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
   late TextEditingController mobileController;
   late TextEditingController joiningDateController;
 
-  bool loading = false;
+  bool _updating = false;
+  bool _deleting = false;
 
   File? _pickedImage;
   String? _existingBase64;
@@ -215,8 +216,9 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
   String? _validateEmail(String? value) {
     final v = value?.trim() ?? '';
     if (v.isEmpty) return 'Email is required';
-    if (!RegExp(r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$')
-        .hasMatch(v)) {
+    if (!RegExp(
+      r'^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$',
+    ).hasMatch(v)) {
       return 'Enter a valid email address';
     }
     return null;
@@ -256,27 +258,28 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      setState(() => loading = true);
+      setState(() => _updating = true);
 
       String? base64Image = _existingBase64;
       if (_imageChanged) {
-        base64Image =
-        _pickedImage != null ? await _imageToBase64(_pickedImage!) : null;
+        base64Image = _pickedImage != null
+            ? await _imageToBase64(_pickedImage!)
+            : null;
       }
 
       await FirebaseFirestore.instance
           .collection('employees')
           .doc(widget.documentId)
           .update({
-        'employeeId': employeeIdController.text.trim(),
-        'name': nameController.text.trim(),
-        'department': departmentController.text.trim(),
-        'designation': designationController.text.trim(),
-        'email': emailController.text.trim(),
-        'mobile': mobileController.text.trim(),
-        'joiningDate': joiningDateController.text.trim(),
-        'imageUrl': base64Image,
-      });
+            'employeeId': employeeIdController.text.trim(),
+            'name': nameController.text.trim(),
+            'department': departmentController.text.trim(),
+            'designation': designationController.text.trim(),
+            'email': emailController.text.trim(),
+            'mobile': mobileController.text.trim(),
+            'joiningDate': joiningDateController.text.trim(),
+            'imageUrl': base64Image,
+          });
 
       if (!mounted) return;
 
@@ -297,7 +300,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
         ),
       );
     } finally {
-      if (mounted) setState(() => loading = false);
+      if (mounted) setState(() => _updating = false);
     }
   }
 
@@ -323,7 +326,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
     if (confirm != true) return;
 
     try {
-      setState(() => loading = true);
+      setState(() => _deleting = true);
 
       await FirebaseFirestore.instance
           .collection('employees')
@@ -349,7 +352,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
         ),
       );
     } finally {
-      if (mounted) setState(() => loading = false);
+      if (mounted) setState(() => _deleting = false);
     }
   }
 
@@ -516,7 +519,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
                     );
                     if (date != null) {
                       joiningDateController.text =
-                      "${date.day}/${date.month}/${date.year}";
+                          "${date.day}/${date.month}/${date.year}";
                     }
                   },
                 ),
@@ -527,14 +530,14 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton.icon(
-                    onPressed: loading ? null : updateEmployee,
+                    onPressed: (_updating || _deleting) ? null : updateEmployee,
                     icon: const Icon(Icons.save),
-                    label: loading
+                    label: _updating
                         ? const SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
                         : const Text("Update Employee"),
                     style: ElevatedButton.styleFrom(
                       shape: RoundedRectangleBorder(
@@ -550,9 +553,15 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
                   width: double.infinity,
                   height: 50,
                   child: OutlinedButton.icon(
-                    onPressed: loading ? null : deleteEmployee,
+                    onPressed: (_updating || _deleting) ? null : deleteEmployee,
                     icon: const Icon(Icons.delete_outline),
-                    label: const Text("Delete Employee"),
+                    label: _deleting
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Text("Delete Employee"),
                     style: OutlinedButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
