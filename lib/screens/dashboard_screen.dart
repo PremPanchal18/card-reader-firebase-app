@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:card_reader_firebase_app/services/auth_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -223,9 +225,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
 
                           leading: CircleAvatar(
-                            child: Text(
+                            backgroundColor: Colors.grey.shade200,
+                            backgroundImage: (data['imageUrl'] != null &&
+                                data['imageUrl'].toString().isNotEmpty)
+                                ? MemoryImage(base64Decode(data['imageUrl'].toString()))
+                                : null,
+                            child: (data['imageUrl'] == null ||
+                                data['imageUrl'].toString().isEmpty)
+                                ? Text(
                               data['name'].toString()[0].toUpperCase(),
-                            ),
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            )
+                                : null,
                           ),
 
                           title: Text(

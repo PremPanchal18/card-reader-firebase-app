@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
 
 class EmployeeDetailsScreen extends StatefulWidget {
   final String documentId;
@@ -35,7 +35,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
   bool loading = false;
 
   File? _pickedImage;
-  String? _existingBase64;       // loaded from Firestore
+  String? _existingBase64;
   bool _imageChanged = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -66,8 +66,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
       text: widget.employeeData['joiningDate'] ?? '',
     );
 
-    // Load existing image if any
-    _existingBase64 = widget.employeeData['imageBase64'];
+    _existingBase64 = widget.employeeData['imageUrl'];
   }
 
   @override
@@ -158,7 +157,6 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
     );
   }
 
-  /// Compress + convert picked image to Base64
   Future<String?> _imageToBase64(File file) async {
     final bytes = await file.readAsBytes();
 
@@ -172,7 +170,6 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
     );
 
     final compressed = img.encodeJpg(resized, quality: 70);
-
     return base64Encode(compressed);
   }
 
@@ -261,7 +258,6 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
     try {
       setState(() => loading = true);
 
-      // Only re-encode if user changed the image
       String? base64Image = _existingBase64;
       if (_imageChanged) {
         base64Image =
@@ -279,7 +275,7 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
         'email': emailController.text.trim(),
         'mobile': mobileController.text.trim(),
         'joiningDate': joiningDateController.text.trim(),
-        'imageBase64': base64Image,   // null clears it
+        'imageUrl': base64Image,
       });
 
       if (!mounted) return;
@@ -393,7 +389,11 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),
-                child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                child: const Icon(
+                  Icons.camera_alt,
+                  size: 16,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
@@ -428,6 +428,8 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
     );
   }
 
+  // ─── Build ─────────────────────────────────────────────────────────────────
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -440,7 +442,6 @@ class _EmployeeDetailsScreenState extends State<EmployeeDetailsScreen> {
             key: _formKey,
             child: Column(
               children: [
-                // ── Avatar ──
                 _buildAvatar(),
 
                 const SizedBox(height: 8),
