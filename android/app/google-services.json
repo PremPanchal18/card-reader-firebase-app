@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "482037342151",
+    "project_id": "card-reader-firebase-app",
+    "storage_bucket": "card-reader-firebase-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:482037342151:android:f49201c03132907e5383e2",
+        "android_client_info": {
+          "package_name": "com.example.card_reader_firebase_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAvU_4f0jKAslsHmwUQxydO7sY8jUL99CA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
